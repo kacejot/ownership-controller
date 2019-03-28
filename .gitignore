@@ -1,3 +1,6 @@
+# go get & dep files
+Gopkg.lock
+vendor
 # Binaries for programs and plugins
 *.exe
 *.exe~
