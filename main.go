@@ -3,18 +3,16 @@ package main
 import (
 	"log"
 
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
+	signals "github.com/kacejot/rep-controller/pkg/signals"
 )
 
-type RepoController struct {
-}
-
 func main() {
-	kubeconfig, err := rest.InClusterConfig()
-	if err != nil {
-		log.Fatalf("Failed creating in-cluster config: %v\n", err)
-	}
 
-	client * kubernetes.Clientset
+	stopCh := signals.SetupSignalHandler()
+	controller := NewRepoController()
+	controller.Run(stopCh)
+
+	<-stopCh
+
+	log.Println("Controller has stopped")
 }
