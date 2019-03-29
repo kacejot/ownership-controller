@@ -1,0 +1,7 @@
+apiVersion: myproject.com/v1alpha1
+kind: Repo
+metadata:
+  name: hello-world-repo
+spec:
+  repoAddress: "path/hello-world" 
+  dockerImage: "path/build-image"
