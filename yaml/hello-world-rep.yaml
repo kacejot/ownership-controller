@@ -1,7 +1,22 @@
-apiVersion: myproject.com/v1alpha1
-kind: Repo
+apiVersion: v1
+kind: ServiceAccount
 metadata:
-  name: hello-world-repo
+  name: sample-service-account-1
+  namespace: kube-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sample-service-account-2
+  namespace: kube-system
+---
+apiVersion: myproject.com/v1alpha1
+kind: Owner
+metadata:
+  name: 
 spec:
-  repoAddress: "path/hello-world" 
-  dockerImage: "path/build-image"
+  ownedResources:
+  - name: sample-service-account-1
+    namespace: kube-system
+  - name: sample-service-account-2
+    namespace: kube-system

@@ -1,38 +1,38 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: rep-controller-service-account
+  name: controller-service-account
   namespace: kube-system
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: rep-controller-admin
+  name: controller-admin
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: cluster-admin
 subjects:
 - kind: ServiceAccount
-  name: rep-controller-service-account
+  name: controller-service-account
   namespace: kube-system
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   namespace: kube-system
-  name: rep-controller
+  name: controller
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: rep-controller
+        app: controller
     spec:
-      serviceAccountName: rep-controller-service-account
+      serviceAccountName: controller-service-account
       containers:
-      - name: rep-controller
-        image: kacejot/rep-controller:v1
+      - name: controller
+        image: kacejot/controller:v1
         imagePullPolicy: Always
         securityContext:
           privileged: true

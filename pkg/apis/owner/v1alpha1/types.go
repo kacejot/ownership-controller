@@ -6,28 +6,30 @@ import (
 
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-type Repo struct {
+type Owner struct {
 	meta.TypeMeta   `json:",inline"`
 	meta.ObjectMeta `json:"metadata,omitempty"`
-	Spec            RepoSpec   `json:"spec"`
-	Status          RepoStatus `json:"status"`
+	Spec            OwnerSpec   `json:"spec"`
+	Status          OwnerStatus `json:"status"`
 }
 
-type RepoSpec struct {
-	RepoAddress   string   `json:"repoAddress"`
-	DockerImage   string   `json:"dockerImage"`
-	BuildCommands []string `json:"buildCommands"`
-	Artifacts     []string `json:"artifacts"`
+type OwnerSpec struct {
+	OwnedResources   []OwnedResource   `json:"ownedResources"`
 }
 
-type RepoStatus struct {
+type OwnedResource struct {
+    Name string `json:"name"`
+    Namespace string `json:"namespace"`
+}
+
+type OwnerStatus struct {
 	Log []string `json:"log"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-type RepoList struct {
+type OwnerList struct {
 	meta.TypeMeta `json:",inline"`
 	meta.ListMeta `json:"metadata"`
-	Items         []Repo `json:"items"`
+	Items         []Owner `json:"items"`
 }

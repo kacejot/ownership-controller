@@ -9,7 +9,7 @@ import (
 func main() {
 
 	stopCh := signals.SetupSignalHandler()
-	controller := NewRepoController()
+	controller := NewOwnershipController()
 	controller.Run(stopCh)
 
 	<-stopCh

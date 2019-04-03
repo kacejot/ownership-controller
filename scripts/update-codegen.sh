@@ -10,4 +10,4 @@ ${CODEGEN_PKG}/generate-groups.sh \
     "all" \
     ${PKG}/pkg/client \
     ${PKG}/pkg/apis \
-    repo:v1alpha1
+    owner:v1alpha1
