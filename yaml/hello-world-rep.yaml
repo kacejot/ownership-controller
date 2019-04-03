@@ -13,7 +13,7 @@ metadata:
 apiVersion: myproject.com/v1alpha1
 kind: Owner
 metadata:
-  name: 
+  name: accounts-owner
 spec:
   ownedResources:
   - name: sample-service-account-1

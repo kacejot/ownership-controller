@@ -32,7 +32,7 @@ spec:
       serviceAccountName: controller-service-account
       containers:
       - name: controller
-        image: kacejot/controller:v1
+        image: kacejot/ownership-controller:v1
         imagePullPolicy: Always
         securityContext:
           privileged: true
