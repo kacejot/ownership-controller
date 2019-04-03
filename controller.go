@@ -70,7 +70,7 @@ func (rc *OwnershipController) Run(stopCh <-chan struct{}) {
 }
 
 func (rc *OwnershipController) onCreate(resource interface{}) {
-	owner, ok := resource.(v1alpha1.Owner)
+	owner, ok := resource.(*v1alpha1.Owner)
 	if !ok {
 		log.Fatalf("Failed to cast to owner type")
 	}
