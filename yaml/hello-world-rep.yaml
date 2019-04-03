@@ -16,7 +16,11 @@ metadata:
   name: accounts-owner
 spec:
   ownedResources:
-  - name: sample-service-account-1
+  - kind: serviceaccounts
+    apiVersion: v1
+    name: sample-service-account-1
     namespace: kube-system
-  - name: sample-service-account-2
+  - kind: serviceaccounts
+    apiVersion: v1
+    name: sample-service-account-2
     namespace: kube-system

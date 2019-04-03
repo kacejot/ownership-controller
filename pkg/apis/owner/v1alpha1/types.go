@@ -14,12 +14,14 @@ type Owner struct {
 }
 
 type OwnerSpec struct {
-	OwnedResources   []OwnedResource   `json:"ownedResources"`
+	OwnedResources []OwnedResource `json:"ownedResources"`
 }
 
 type OwnedResource struct {
-    Name string `json:"name"`
-    Namespace string `json:"namespace"`
+	Kind       string `json:"kind"`
+	APIVersion string `json:"apiVersion"`
+	Name       string `json:"name"`
+	Namespace  string `json:"namespace"`
 }
 
 type OwnerStatus struct {
