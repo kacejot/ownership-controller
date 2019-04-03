@@ -9,12 +9,12 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 
-	kubeinformers "k8s.io/client-go/informers"
-	"k8s.io/client-go/kubernetes"
-
+	"github.com/kacejot/ownership-controller/pkg/apis/owner/v1alpha1"
 	clientset "github.com/kacejot/ownership-controller/pkg/client/clientset/versioned"
 	informers "github.com/kacejot/ownership-controller/pkg/client/informers/externalversions"
 	ownerinformer "github.com/kacejot/ownership-controller/pkg/client/informers/externalversions/owner/v1alpha1"
+	kubeinformers "k8s.io/client-go/informers"
+	"k8s.io/client-go/kubernetes"
 )
 
 // OwnershipController check that all owned resoruces are created
@@ -70,26 +70,16 @@ func (rc *OwnershipController) Run(stopCh <-chan struct{}) {
 }
 
 func (rc *OwnershipController) onCreate(resource interface{}) {
-	key := rc.getResourceKey(resource)
-	namespace, name, _ := cache.SplitMetaNamespaceKey(key)
-	owner, err := rc.ownerInformer.Lister().Owners(namespace).Get(name)
-
-	if err != nil {
-		log.Fatalf("Failed to find owner resource: %v\n", err)
+	owner, ok := resource.(v1alpha1.Owner)
+	if !ok {
+		log.Fatalf("Failed to cast to owner type")
 	}
-
-	log.Printf("Owner created: %s, %s, %s", key, namespace, name)
 
 	for _, owned := range owner.Spec.OwnedResources {
 		gvk := schema.FromAPIVersionAndKind(owned.APIVersion, owned.Kind)
 		gvr, _ := meta.UnsafeGuessKindToResource(gvk)
 
-		genericInformer, err := rc.kubeInformerFactory.ForResource(schema.GroupVersionResource{
-			Group:    gvr.Group,
-			Version:  gvr.Version,
-			Resource: gvr.Resource,
-		})
-
+		genericInformer, err := rc.kubeInformerFactory.ForResource(gvr)
 		if err != nil {
 			log.Fatalf("Failed to create generic informer: %v\n", err)
 		}
