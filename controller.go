@@ -54,24 +54,24 @@ func (rc *OwnershipController) Run(stopCh <-chan struct{}) {
 
 func (rc *OwnershipController) onCreate(resource interface{}) {
 	key := rc.getResourceKey(resource)
-	log.Printf("Policy created: %s", key)
+	log.Printf("Owner created: %s", key)
 }
 
 func (rc *OwnershipController) onUpdate(oldResource, newResource interface{}) {
 	oldKey := rc.getResourceKey(oldResource)
 	newKey := rc.getResourceKey(newResource)
 
-	log.Printf("Policy %s updated to %s", oldKey, newKey)
+	log.Printf("Owner %s updated to %s", oldKey, newKey)
 }
 
 func (rc *OwnershipController) onDelete(resource interface{}) {
 	key := rc.getResourceKey(resource)
-	log.Printf("Policy deleted: %s", key)
+	log.Printf("Owner deleted: %s", key)
 }
 
 func (rc *OwnershipController) getResourceKey(resource interface{}) string {
 	if key, err := cache.MetaNamespaceKeyFunc(resource); err != nil {
-		log.Fatalf("Error retrieving policy key: %v", err)
+		log.Fatalf("Error retrieving owner key: %v", err)
 	} else {
 		return key
 	}
