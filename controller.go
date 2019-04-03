@@ -7,8 +7,8 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 
-	clientset "github.com/kacejot/rep-controller/pkg/client/clientset/versioned"
-	informers "github.com/kacejot/rep-controller/pkg/client/informers/externalversions"
+	clientset "github.com/kacejot/ownership-controller/pkg/client/clientset/versioned"
+	informers "github.com/kacejot/ownership-controller/pkg/client/informers/externalversions"
 )
 
 // OwnershipController check that all owned resoruces are created

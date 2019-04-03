@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	signals "github.com/kacejot/rep-controller/pkg/signals"
+	signals "github.com/kacejot/ownership-controller/pkg/signals"
 )
 
 func main() {

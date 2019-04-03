@@ -1,7 +1,7 @@
 package v1alpha1
 
 import (
-	owner "github.com/kacejot/rep-controller/pkg/apis/owner"
+	owner "github.com/kacejot/ownership-controller/pkg/apis/owner"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"

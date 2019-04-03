@@ -7,7 +7,7 @@ vendor
 *.dll
 *.so
 *.dylib
-rep-controller
+ownership-controller
 
 # Test binary, build with `go test -c`
 *.test
