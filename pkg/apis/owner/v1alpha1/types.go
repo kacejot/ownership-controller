@@ -18,10 +18,9 @@ type OwnerSpec struct {
 }
 
 type OwnedResource struct {
-	Kind       string `json:"kind"`
-	APIVersion string `json:"apiVersion"`
-	Name       string `json:"name"`
-	Namespace  string `json:"namespace"`
+	Resource  string `json:"resource"`
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
 }
 
 type OwnerStatus struct {

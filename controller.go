@@ -4,8 +4,7 @@ import (
 	"log"
 	"time"
 
-	"k8s.io/apimachinery/pkg/api/meta"
-	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 
@@ -13,6 +12,7 @@ import (
 	clientset "github.com/kacejot/ownership-controller/pkg/client/clientset/versioned"
 	informers "github.com/kacejot/ownership-controller/pkg/client/informers/externalversions"
 	ownerinformer "github.com/kacejot/ownership-controller/pkg/client/informers/externalversions/owner/v1alpha1"
+	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kubeinformers "k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 )
@@ -24,6 +24,7 @@ type OwnershipController struct {
 	informerFactory     informers.SharedInformerFactory
 	kubeInformerFactory kubeinformers.SharedInformerFactory
 	ownerInformer       ownerinformer.OwnerInformer
+	kubeclient          *kubernetes.Clientset
 }
 
 // NewOwnershipController creates controller for Owner resource
@@ -52,6 +53,7 @@ func NewOwnershipController() *OwnershipController {
 		informerFactory:     informerFactory,
 		kubeInformerFactory: kubeInformerFactory,
 		ownerInformer:       informer,
+		kubeclient:          kubeclient,
 	}
 
 	informer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
@@ -72,24 +74,17 @@ func (rc *OwnershipController) Run(stopCh <-chan struct{}) {
 func (rc *OwnershipController) onCreate(resource interface{}) {
 	owner, ok := resource.(*v1alpha1.Owner)
 	if !ok {
-		log.Fatalf("Failed to cast to owner type")
+		log.Println("Failed to cast to owner type")
+		return
 	}
 
-	for _, owned := range owner.Spec.OwnedResources {
-		gvk := schema.FromAPIVersionAndKind(owned.APIVersion, owned.Kind)
-		gvr, _ := meta.UnsafeGuessKindToResource(gvk)
-
-		genericInformer, err := rc.kubeInformerFactory.ForResource(gvr)
-		if err != nil {
-			log.Fatalf("Failed to create generic informer: %v\n", err)
-		}
-
-		_, err = genericInformer.Lister().ByNamespace(owned.Namespace).Get(owned.Name)
-		if err != nil {
-			log.Printf("Failed to retrieve resource: %v\n", err)
-			// Delete other resources
-		}
+	if rc.checkOwnedResources(owner) == nil {
+		key := rc.getResourceKey(resource)
+		log.Printf("Owner and its resources successfully created: %s", key)
+		return
 	}
+
+	rc.deleteOwnedResources(owner)
 }
 
 func (rc *OwnershipController) onUpdate(oldResource, newResource interface{}) {
@@ -102,6 +97,50 @@ func (rc *OwnershipController) onUpdate(oldResource, newResource interface{}) {
 func (rc *OwnershipController) onDelete(resource interface{}) {
 	key := rc.getResourceKey(resource)
 	log.Printf("Owner deleted: %s", key)
+}
+
+func (rc *OwnershipController) checkOwnedResources(owner *v1alpha1.Owner) error {
+	for _, owned := range owner.Spec.OwnedResources {
+		getOptions := meta.GetOptions{
+			ResourceVersion:      "",
+			IncludeUninitialized: true,
+		}
+
+		err := rc.kubeclient.CoreV1().RESTClient().
+			Get().
+			Name(owned.Name).
+			Namespace(owned.Namespace).
+			Resource(owned.Resource).
+			VersionedParams(&getOptions, scheme.ParameterCodec).
+			Do().
+			Error()
+
+		if err != nil {
+			log.Printf("Can not find resource: %s, deleting owned resources\n", owned.Name)
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (rc *OwnershipController) deleteOwnedResources(owner *v1alpha1.Owner) {
+	for _, owned := range owner.Spec.OwnedResources {
+		deleteOptions := meta.DeleteOptions{}
+
+		err := rc.kubeclient.CoreV1().RESTClient().
+			Delete().
+			Namespace(owned.Namespace).
+			Resource(owned.Resource).
+			Name(owned.Name).
+			Body(deleteOptions).
+			Do().
+			Error()
+
+		if err != nil {
+			log.Printf("Can not clean up resource: %s\n", owned.Name)
+		}
+	}
 }
 
 func (rc *OwnershipController) getResourceKey(resource interface{}) string {
