@@ -7,7 +7,6 @@ import (
 )
 
 func main() {
-
 	stopCh := signals.SetupSignalHandler()
 	controller := NewOwnershipController()
 	controller.Run(stopCh)
