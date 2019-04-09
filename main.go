@@ -11,7 +11,7 @@ func main() {
 	controller := NewOwnershipController()
 	controller.Run(stopCh)
 
+	log.Println("Controller has started")
 	<-stopCh
-
 	log.Println("Controller has stopped")
 }
