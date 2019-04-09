@@ -133,12 +133,12 @@ func (rc *OwnershipController) deleteOwnedResources(owner *v1alpha1.Owner) {
 			Namespace(owned.Namespace).
 			Resource(owned.Resource).
 			Name(owned.Name).
-			Body(deleteOptions).
+			Body(&deleteOptions).
 			Do().
 			Error()
 
 		if err != nil {
-			log.Printf("Can not clean up resource: %s\n", owned.Name)
+			log.Printf("Can not clean up resource: %s. Error: %v\n", owned.Name, err)
 		}
 	}
 }
