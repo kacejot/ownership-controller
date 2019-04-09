@@ -43,3 +43,31 @@ Check controller logs:
 
 ## Owner usage
 You can now use `Owner` to be sure that all resources that owner owns will be delete if someone fails on its creation.
+Example of usage:
+
+```yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sample-service-account-1
+  namespace: kube-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sample-service-account-2
+  namespace: kube-system
+---
+apiVersion: myproject.com/v1alpha1
+kind: Owner
+metadata:
+  name: accounts-owner
+spec:
+  ownedResources:
+  - resource: serviceaccounts
+    name: sample-service-account-1
+    namespace: kube-system
+  - resource: serviceaccounts
+    name: sample-service-account-2
+    namespace: kube-system
+```
