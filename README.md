@@ -18,6 +18,10 @@ Go to the project directory:
 
 `cd $GOPATH/src/github.com/kacejot/ownership-controller`
 
+Run codegen sript to generate helper types for controller work:
+
+`./scripts/update_codegen.sh`
+
 Build and push the docker image with it to Docker Hub:
 
 `docker build --no-cache -t "<user>/<tag>" . && docker push <user>/<tag>`
@@ -27,4 +31,49 @@ Let the project root dir be `$PROJECT_ROOT`. `$PROJECT_ROOT/yaml/crd.yaml` is a 
 
 `kubectl create -f $PROJECT_ROOT/yaml/crd.yaml`
 
-In `$PROJECT_ROOT/yaml` you have `deploy-controller.yaml`. This file is responsible for controller creation inside of the cluster. It has several resources: `ServiceAccount`, `ClusterRoleBinding` and `Deployment`. `ClusterRoleBinding` binds cluster-admin role to our `ServiceAccount`. That is necessary to allow controller to list `Owner` resource in cluster scope. `Deployment` is resource that pulls down image with controller and runs it in the pod. Write your image in `image` field.
+In `$PROJECT_ROOT/yaml` you have `deploy-controller.yaml`. This file is responsible for controller creation inside of the cluster. It has several resources: `ServiceAccount`, `ClusterRoleBinding` and `Deployment`. `ClusterRoleBinding` binds cluster-admin role to our `ServiceAccount`. That is necessary to allow controller to list `Owner` resource in cluster scope. `Deployment` is resource that pulls down image with controller and runs it in the pod. Write your image in `image` field and launch the controller inside the cluster:
+
+`kubectl create -f $PROJECT_ROOT/yaml/deploy-controller.yaml`
+
+Now controller works and CRD is registered on the cluster. The last thing that left is to test its work. Create resource with `Owner` type like described in `owner-example.yaml` and `error-owner-example.yaml`
+
+You also can check controller work with logs and pod status. Check that pod is running: 
+
+`kubectl get pods -n kube-system`
+
+Check controller logs:
+
+`kubectl logs -n kube-system controller-******`
+
+## Owner usage
+You can now use `Owner` to be sure that all resources that owner owns will be deleted if someone fails on its creation.
+Owner structure:`Owner` contains array of owned resource. Each resource must be represented with 3 fields: namespace, name and resource. Resource field is a plural form for your resource kind definded in its CRD. All the standard resource kinds has plural form by default.
+
+Example of usage:
+
+```yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sample-service-account-1
+  namespace: kube-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sample-service-account-2
+  namespace: kube-system
+---
+apiVersion: myproject.com/v1alpha1
+kind: Owner
+metadata:
+  name: accounts-owner
+spec:
+  ownedResources:
+  - resource: serviceaccounts
+    name: sample-service-account-1
+    namespace: kube-system
+  - resource: serviceaccounts
+    name: sample-service-account-2
+    namespace: kube-system
+```
