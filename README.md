@@ -18,6 +18,10 @@ Go to the project directory:
 
 `cd $GOPATH/src/github.com/kacejot/ownership-controller`
 
+Run codegen sript to generate helper types for controller work:
+
+`./scripts/update_codegen.sh`
+
 Build and push the docker image with it to Docker Hub:
 
 `docker build --no-cache -t "<user>/<tag>" . && docker push <user>/<tag>`
@@ -42,7 +46,9 @@ Check controller logs:
 `kubectl logs -n kube-system controller-******`
 
 ## Owner usage
-You can now use `Owner` to be sure that all resources that owner owns will be delete if someone fails on its creation.
+You can now use `Owner` to be sure that all resources that owner owns will be deleted if someone fails on its creation.
+Owner structure:`Owner` contains array of owned resource. Each resource must be represented with 3 fields: namespace, name and resource. Resource field is a plural form for your resource kind definded in its CRD. All the standard resource kinds has plural form by default.
+
 Example of usage:
 
 ```yaml
