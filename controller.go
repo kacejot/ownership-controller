@@ -11,20 +11,15 @@ import (
 	"github.com/kacejot/ownership-controller/pkg/apis/owner/v1alpha1"
 	clientset "github.com/kacejot/ownership-controller/pkg/client/clientset/versioned"
 	informers "github.com/kacejot/ownership-controller/pkg/client/informers/externalversions"
-	ownerinformer "github.com/kacejot/ownership-controller/pkg/client/informers/externalversions/owner/v1alpha1"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
-	kubeinformers "k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 )
 
 // OwnershipController check that all owned resoruces are created
 // Otherwise it deletes all resources owned by owner resource
 type OwnershipController struct {
-	client              *clientset.Clientset
-	informerFactory     informers.SharedInformerFactory
-	kubeInformerFactory kubeinformers.SharedInformerFactory
-	ownerInformer       ownerinformer.OwnerInformer
-	kubeclient          *kubernetes.Clientset
+	informerFactory informers.SharedInformerFactory
+	kubeclient      *kubernetes.Clientset
 }
 
 // NewOwnershipController creates controller for Owner resource
@@ -44,16 +39,12 @@ func NewOwnershipController() *OwnershipController {
 		log.Fatalf("Failed creating kubernetes client: %v\n", err)
 	}
 
-	kubeInformerFactory := kubeinformers.NewSharedInformerFactory(kubeclient, time.Second*30)
 	informerFactory := informers.NewSharedInformerFactory(client, time.Second*30)
 	informer := informerFactory.Myproject().V1alpha1().Owners()
 
 	controller := &OwnershipController{
-		client:              client,
-		informerFactory:     informerFactory,
-		kubeInformerFactory: kubeInformerFactory,
-		ownerInformer:       informer,
-		kubeclient:          kubeclient,
+		informerFactory: informerFactory,
+		kubeclient:      kubeclient,
 	}
 
 	informer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
@@ -68,7 +59,6 @@ func NewOwnershipController() *OwnershipController {
 // Run starts informer that monitors cluster for resource events
 func (rc *OwnershipController) Run(stopCh <-chan struct{}) {
 	rc.informerFactory.Start(stopCh)
-	rc.kubeInformerFactory.Start(stopCh)
 }
 
 func (rc *OwnershipController) onCreate(resource interface{}) {
